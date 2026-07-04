@@ -94,7 +94,7 @@ Projects·Experience 두 섹션이 동일한 카드 레이아웃(상단 이미�
 
 ### `experiences` (2건, placeholder)
 
-1. TradieCoach — role/period/bullets/skills 모두 `TODO` placeholder, `image`/`link`도 placeholder 경로
+1. TradieCoach - role/period/bullets/skills 모두 `TODO` placeholder, `image`/`link`도 placeholder 경로
 2. Pupfish — 위와 동일하게 placeholder 상태
 
 사용자가 `public/images/`에 실제 이미지를 넣고 텍스트·링크를 직접 채울 예정입니다.

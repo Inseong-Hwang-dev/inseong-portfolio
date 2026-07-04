@@ -239,7 +239,7 @@ export default function HomePage() {
       bullets: [
         {
           tone: "sky",
-          text: "Car park rental marketplace — users rent out unused parking spaces directly to others."
+          text: "Car park rental marketplace - users rent out unused parking spaces directly to others."
         },
         {
           tone: "violet",
@@ -488,7 +488,7 @@ export default function HomePage() {
                         ) : (
                           exp.company
                         )}
-                        {" — "}
+                        {" - "}
                         {exp.role}
                       </h3>
                       <p className="font-bold text-primary">{exp.badge}</p>
