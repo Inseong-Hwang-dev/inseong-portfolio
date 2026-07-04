@@ -1,1 +1,1 @@
-self.__REACT_LOADABLE_MANIFEST="{}"
+self.__REACT_LOADABLE_MANIFEST="{\"components/ThreeDecoration.tsx -> three\":{\"id\":\"components/ThreeDecoration.tsx -> three\",\"files\":[\"static/chunks/_app-pages-browser_node_modules_three_build_three_module_js.js\"]}}"
