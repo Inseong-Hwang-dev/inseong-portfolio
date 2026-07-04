@@ -50,6 +50,39 @@ function badgeClass(badge: string) {
   return "bg-primary/10 text-primary border-primary/20";
 }
 
+function ExternalLink({
+  href,
+  children,
+  className = "",
+  variant = "inline",
+  showIcon = true
+}: {
+  href: string;
+  children: React.ReactNode;
+  className?: string;
+  variant?: "inline" | "cta";
+  showIcon?: boolean;
+}) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noreferrer"
+      className={`external-link group inline-flex items-center ${variant === "cta" ? "external-link--cta" : ""} ${className}`}
+    >
+      <span className="external-link__text">{children}</span>
+      {showIcon && (
+        <span
+          className="material-symbols-outlined external-link__icon shrink-0 text-[1.125rem]"
+          aria-hidden
+        >
+          {variant === "cta" ? "arrow_outward" : "open_in_new"}
+        </span>
+      )}
+    </a>
+  );
+}
+
 function GlassCard({
   children,
   className = "",
@@ -80,33 +113,41 @@ function ProjectCard({
   const details = project.bullets.filter((b) => b.tone !== "sky").slice(0, 2);
 
   const title = project.link ? (
-    <a
-      href={project.link}
-      target="_blank"
-      rel="noreferrer"
-      className="group inline-flex items-start gap-1 text-white transition hover:text-primary"
-    >
+    <ExternalLink href={project.link} className="text-white">
       {project.title}
-      <span className="material-symbols-outlined text-base opacity-70 transition group-hover:translate-x-0.5 group-hover:opacity-100">
-        open_in_new
-      </span>
-    </a>
+    </ExternalLink>
   ) : (
     project.title
   );
 
   return (
     <GlassCard cardRef={cardRef} className="flex h-full flex-col p-stack-lg">
-      {project.image && (
-        <div className="mb-stack-md overflow-hidden rounded-lg border border-border-subtle bg-white/95 p-3">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={project.image}
-            alt={project.title}
-            className="mx-auto h-36 w-full object-contain"
-          />
-        </div>
-      )}
+      {project.image &&
+        (project.link ? (
+          <a
+            href={project.link}
+            target="_blank"
+            rel="noreferrer"
+            aria-label={`Visit ${project.title}`}
+            className="card-media-link mb-stack-md block overflow-hidden rounded-lg border border-border-subtle bg-white/95 p-3"
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={project.image}
+              alt={project.title}
+              className="mx-auto h-36 w-full object-contain"
+            />
+          </a>
+        ) : (
+          <div className="mb-stack-md overflow-hidden rounded-lg border border-border-subtle bg-white/95 p-3">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={project.image}
+              alt={project.title}
+              className="mx-auto h-36 w-full object-contain"
+            />
+          </div>
+        ))}
       <div className="mb-stack-md">
         <span
           className={`rounded-full border px-3 py-1 font-mono text-caption ${badgeClass(project.badge)}`}
@@ -125,7 +166,7 @@ function ProjectCard({
           </li>
         ))}
       </ul>
-      <div className="mt-auto flex flex-wrap gap-2">
+      <div className="mt-auto flex flex-wrap items-center gap-2">
         {project.skills.slice(0, 4).map((skill) => (
           <span
             key={skill}
@@ -134,6 +175,11 @@ function ProjectCard({
             {skill}
           </span>
         ))}
+        {project.link && (
+          <ExternalLink href={project.link} variant="cta" className="ml-auto">
+            Visit project
+          </ExternalLink>
+        )}
       </div>
     </GlassCard>
   );
@@ -477,14 +523,7 @@ export default function HomePage() {
                     <div>
                       <h3 className="font-[family-name:var(--font-display)] text-headline-md text-white">
                         {exp.link ? (
-                          <a
-                            href={exp.link}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="hover:text-primary"
-                          >
-                            {exp.company}
-                          </a>
+                          <ExternalLink href={exp.link}>{exp.company}</ExternalLink>
                         ) : (
                           exp.company
                         )}
@@ -515,6 +554,13 @@ export default function HomePage() {
                       </span>
                     ))}
                   </div>
+                  {exp.link && (
+                    <div className="mt-4 border-t border-border-subtle pt-4">
+                      <ExternalLink href={exp.link} variant="cta">
+                        Visit project
+                      </ExternalLink>
+                    </div>
+                  )}
                 </>
               );
 
@@ -525,27 +571,60 @@ export default function HomePage() {
                     {exp.image && isPortraitSide ? (
                       <div className="flex flex-col gap-stack-md sm:flex-row sm:items-start sm:gap-stack-lg">
                         <div className="min-w-0 flex-1">{cardContent}</div>
-                        <div className="mx-auto shrink-0 overflow-hidden rounded-lg border border-border-subtle bg-white/95 p-2 sm:mx-0 sm:ml-auto">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            src={exp.image}
-                            alt={`${exp.company} cover`}
-                            className="h-52 w-auto max-w-[9.5rem] object-contain sm:h-64 sm:max-w-[10.5rem]"
-                          />
-                        </div>
-                      </div>
-                    ) : (
-                      <>
-                        {exp.image && (
-                          <div className="mb-stack-md overflow-hidden rounded-lg border border-border-subtle bg-white/95 p-3">
+                        {exp.link ? (
+                          <a
+                            href={exp.link}
+                            target="_blank"
+                            rel="noreferrer"
+                            aria-label={`Visit ${exp.company} project`}
+                            className="card-media-link mx-auto shrink-0 overflow-hidden rounded-lg border border-border-subtle bg-white/95 p-2 sm:mx-0 sm:ml-auto"
+                          >
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                               src={exp.image}
                               alt={`${exp.company} cover`}
-                              className="mx-auto h-36 w-full object-contain"
+                              className="h-52 w-auto max-w-[9.5rem] object-contain sm:h-64 sm:max-w-[10.5rem]"
+                            />
+                          </a>
+                        ) : (
+                          <div className="mx-auto shrink-0 overflow-hidden rounded-lg border border-border-subtle bg-white/95 p-2 sm:mx-0 sm:ml-auto">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={exp.image}
+                              alt={`${exp.company} cover`}
+                              className="h-52 w-auto max-w-[9.5rem] object-contain sm:h-64 sm:max-w-[10.5rem]"
                             />
                           </div>
                         )}
+                      </div>
+                    ) : (
+                      <>
+                        {exp.image &&
+                          (exp.link ? (
+                            <a
+                              href={exp.link}
+                              target="_blank"
+                              rel="noreferrer"
+                              aria-label={`Visit ${exp.company} project`}
+                              className="card-media-link mb-stack-md block overflow-hidden rounded-lg border border-border-subtle bg-white/95 p-3"
+                            >
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img
+                                src={exp.image}
+                                alt={`${exp.company} cover`}
+                                className="mx-auto h-36 w-full object-contain"
+                              />
+                            </a>
+                          ) : (
+                            <div className="mb-stack-md overflow-hidden rounded-lg border border-border-subtle bg-white/95 p-3">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img
+                                src={exp.image}
+                                alt={`${exp.company} cover`}
+                                className="mx-auto h-36 w-full object-contain"
+                              />
+                            </div>
+                          ))}
                         {cardContent}
                       </>
                     )}
