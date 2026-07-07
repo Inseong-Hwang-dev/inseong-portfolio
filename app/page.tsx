@@ -272,6 +272,27 @@ export default function HomePage() {
         }
       ],
       skills: ["Next.js", "React", "Supabase", "TypeScript"]
+    },
+    {
+      company: "Kompass",
+      role: "Software Developer",
+      period: "Jun 2026 – Present",
+      badge: "Community Platform Project",
+      bullets: [
+        {
+          tone: "sky",
+          text: "Korean business discovery platform helping Melbourne residents find Korean-owned local services."
+        },
+        {
+          tone: "violet",
+          text: "Collaborating in a 3-person team with consultation from the Consulate General of the Republic of Korea in Melbourne."
+        },
+        {
+          tone: "violet",
+          text: "Contributed to the mobile-first MVP: English UI, category/map-based discovery, and sorting by relevance, rating, popularity, and alphabetical order."
+        }
+      ],
+      skills: ["Next.js", "TypeScript"]
     }
   ];
 
