@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 148 40" role="img" aria-label="Justin">
+  <defs>
+    <linearGradient id="logo-tile" x1="6" y1="2" x2="34" y2="38" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#152536"/>
+      <stop offset="1" stop-color="#0a1320"/>
+    </linearGradient>
+    <linearGradient id="logo-rim" x1="8" y1="4" x2="32" y2="36" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#5af0ff" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#2d5bff" stop-opacity="0.35"/>
+    </linearGradient>
+  </defs>
+  <rect width="40" height="40" rx="10" fill="url(#logo-tile)"/>
+  <rect x="1.5" y="1.5" width="37" height="37" rx="8.5" fill="none" stroke="url(#logo-rim)" stroke-width="1.75"/>
+  <rect x="7.5" y="9" width="25" height="22" rx="4" fill="#07101c"/>
+  <rect x="7.5" y="9" width="25" height="22" rx="4" fill="none" stroke="rgba(90,240,255,0.22)" stroke-width="1"/>
+  <rect x="7.5" y="9" width="25" height="6" rx="4" fill="#101c2c"/>
+  <rect x="7.5" y="12" width="25" height="3" fill="#101c2c"/>
+  <circle cx="11.6" cy="12" r="1.15" fill="#ff6b7a"/>
+  <circle cx="15.2" cy="12" r="1.15" fill="#ffd166"/>
+  <circle cx="18.8" cy="12" r="1.15" fill="#4ade80"/>
+  <rect x="11" y="18.2" width="8.5" height="1.7" rx="0.85" fill="#5af0ff" opacity="0.95"/>
+  <rect x="11" y="22" width="14" height="1.7" rx="0.85" fill="#7dd3fc" opacity="0.4"/>
+  <rect x="11" y="25.8" width="5.5" height="1.7" rx="0.85" fill="#7dd3fc" opacity="0.28"/>
+  <rect x="21.2" y="17.6" width="2.4" height="3" rx="0.45" fill="#e8fbff"/>
+  <text x="52" y="27" font-family="Sora, ui-sans-serif, system-ui, sans-serif" font-size="20" font-weight="800" fill="#00626e">Justin.</text>
+</svg>
