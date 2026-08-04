@@ -1,0 +1,52 @@
+---
+title: "Implemented an Automated Emailing System"
+description: "Building a reliable transactional email workflow with Supabase and Brevo."
+date: "2026-08-04"
+tags:
+  - Work Log
+  - Supabase
+  - Brevo
+  - Edge Functions
+  - Webhooks
+draft: false
+---
+
+I implemented an automated emailing system using Supabase and Brevo.
+
+The overall idea is simple: when a certain event happens in the application, an email should be sent automatically without someone having to manually send it. For example, this could be a booking update, enquiry confirmation, payment-related notification, or reminder email.
+
+The flow looks like this:
+
+1. An email-triggering event is created or stored in the database.
+2. A cron job runs every minute and checks whether there are any pending emails that need to be sent.
+3. If it finds one, the cron job calls a Supabase Edge Function.
+4. The Edge Function prepares the email data and sends a request to the Brevo API.
+5. Brevo sends the email to the recipient.
+6. Brevo then sends webhook events back to the application, allowing us to update the final delivery status.
+
+The important part I learned here is that sending an email successfully is not the same as the email actually being delivered.
+
+When the Brevo API accepts the request, it only means that Brevo has received the instruction to send the email. The email could still be delivered later, bounced because of an invalid email address, or fail for another reason. Because of this, the Brevo webhook is necessary to track the real outcome.
+
+The email status can be managed like this:
+
+- `pending`: The email has been created and is waiting to be processed.
+- `sending`: The system is currently sending the request to Brevo.
+- `sent`: Brevo has accepted the request.
+- `delivered`: The email was successfully delivered to the recipient's mail server.
+- `bounced`: The email could not be delivered, usually because the address is invalid or unavailable.
+- `failed`: Something went wrong before the email could be sent.
+
+Using a cron job also makes the system more reliable for scheduled emails. Instead of depending on a user action at an exact moment, the system checks regularly for emails that are due. Even if there is a temporary error, the email can remain in the queue and be retried later.
+
+The main services involved were:
+
+- **Supabase Database** - stores email records, recipients, templates, scheduled times, and statuses.
+- **Supabase Cron** - checks every minute for emails waiting to be sent.
+- **Supabase Edge Functions** - securely handles the sending logic and keeps the Brevo API key on the server side.
+- **Brevo API** - sends transactional emails.
+- **Brevo Webhooks** - reports delivery events such as delivered, bounced, or failed.
+
+One thing I want to improve next is retry handling. If Brevo or the Edge Function temporarily fails, the system should retry the email a limited number of times instead of failing permanently straight away. It would also be useful to keep an email activity log so admins can see exactly when an email was created, sent, delivered, or bounced.
+
+This implementation helped me understand that an automated email system is not just about calling an email API. It is more like a small event-processing pipeline: detect the event, queue the job, send it securely, receive the result, and keep the database in sync.

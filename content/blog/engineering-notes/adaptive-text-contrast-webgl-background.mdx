@@ -1,0 +1,67 @@
+---
+title: "Adaptive Text Contrast Against a Moving WebGL Background"
+description: "How I make glass-card text stay readable when dark noise patches drift behind it in light mode — by mirroring the shader in JS instead of reading pixels."
+date: "2026-08-04"
+tags:
+  - Work Log
+  - WebGL
+  - React
+  - CSS
+  - Accessibility
+draft: true
+---
+
+Light mode on this portfolio uses a full-screen WebGL noise background. Glass cards are semi-transparent, so when a dark blotch drifts underneath, dark text (`Email`, `GitHub`, headings, etc.) becomes hard to read.
+
+I wanted the text to flip to a light color **only while** that dark region sits behind the card — interactive contrast, not a static theme change.
+
+## Options I considered
+
+| Approach | Why not (or why) |
+| --- | --- |
+| `mix-blend-mode: difference` | Cheap, but brand colours (cyan accents) look wrong on glass + blur |
+| `readPixels` / screenshot sampling | True pixels, but heavy and awkward with WebGL |
+| **Re-run the shader math in JS** | Same time + UV as the GPU, cheap enough per card |
+
+The background colour is procedural, so I don't need the framebuffer — I just need the same function the fragment shader uses.
+
+## Pipeline
+
+```
+BackgroundShader (rAF)
+  → publishBgFrame(time, isDarkTheme)
+  → sampleBgLuma(x, y, time)   // JS mirror of GLSL
+  → ContrastAware toggles .contrast-aware--on-dark
+  → CSS switches text / icon colours
+```
+
+1. **Publish time each frame** from the WebGL loop so every card shares the same `u_time`.
+2. **Map screen → UV**, remembering CSS Y is top-down while WebGL UV is bottom-up: `uv.y = 1 - clientY / height`.
+3. **Rec. 709 luma** from the mirrored RGB: `0.2126R + 0.7152G + 0.0722B`.
+4. If average luma over a few points on the card is below a threshold (~0.52), treat the backdrop as dark.
+5. Only run this in **light mode**. Dark mode already uses light text.
+
+## React gotcha (worth writing down)
+
+Card entrance uses `IntersectionObserver` to swap `glass-card--hidden` → `glass-card--visible` via `classList`.
+
+If ContrastAware stores "on dark" in React state and re-renders `className`, React rewrites the attribute and can bring `glass-card--hidden` back — the card **vanishes** right when you expect the text to brighten.
+
+Fix: keep React `className` stable; toggle contrast with `element.classList.toggle("contrast-aware--on-dark", next)` only.
+
+## Trade-offs
+
+- GLSL and JS must stay in sync when the shader changes.
+- Sampling ignores glass blur / fill, so luma is "shader truth," not exact on-screen colour.
+- Skip off-screen cards to keep cost down.
+
+## Files
+
+- `components/BackgroundShader.tsx` — render + `publishBgFrame`
+- `lib/bgLuminance.ts` — pub/sub + `sampleBgLuma`
+- `components/ContrastAware.tsx` — subscribe + classList toggle
+- `app/globals.css` — `.contrast-aware--on-dark` colour rules
+
+---
+
+<!-- TODO: polish tone, add a short GIF of Contact cards flipping, maybe a tiny code snippet of sampleBgLuma -->
