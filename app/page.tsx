@@ -1,7 +1,10 @@
 "use client";
 
 import BackgroundShader from "@/components/BackgroundShader";
+import ContrastAware from "@/components/ContrastAware";
+import SiteLogo from "@/components/SiteLogo";
 import ThreeDecoration from "@/components/ThreeDecoration";
+import ThemeToggle from "@/components/theme/ThemeToggle";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
@@ -36,9 +39,6 @@ const sections = [
   { id: "skills", label: "Skills" },
   { id: "contact", label: "Contact" }
 ];
-
-const LOGO_SRC =
-  "https://lh3.googleusercontent.com/aida/AP1WRLvBLc6onh8xWyYXftmBv34o0fM5ZhX2t_83OASwScVoaThlENkR2nZ-MnYvWXiBWL9bFFypbDMLV-FVmm0XNAmE22ine9hvMUrUQ5VxT8-laRJF1XMUZ6LQoG_dkKfEgpIeF84Ru90TQB1YPSxa55V09L3AFRi1JCOEj-4qIVmU6LBL6Ez5M0DDLcXJuuAD3kUFWB-bfy2GCz4iwXEk2sCzNYBMGprrqFdcL5Hs8tiitXCx-AzPEeBxWYnQ";
 
 function badgeClass(badge: string) {
   if (badge === "Hackathon") {
@@ -93,12 +93,13 @@ function GlassCard({
   cardRef?: (el: HTMLElement | null) => void;
 }) {
   return (
-    <article
-      ref={cardRef}
+    <ContrastAware
+      as="article"
+      elementRef={cardRef}
       className={`glass-card glass-card--fade glass-card--hidden rounded-xl ${className}`}
     >
       {children}
-    </article>
+    </ContrastAware>
   );
 }
 
@@ -113,7 +114,7 @@ function ProjectCard({
   const details = project.bullets.filter((b) => b.tone !== "sky").slice(0, 2);
 
   const title = project.link ? (
-    <ExternalLink href={project.link} className="text-white">
+    <ExternalLink href={project.link} className="text-on-surface">
       {project.title}
     </ExternalLink>
   ) : (
@@ -155,7 +156,7 @@ function ProjectCard({
           {project.badge}
         </span>
       </div>
-      <h3 className="mb-stack-md font-[family-name:var(--font-display)] text-headline-md leading-[2.5rem] text-white">
+      <h3 className="mb-stack-md font-[family-name:var(--font-display)] text-headline-md leading-[2.5rem] text-on-surface">
         {title}
       </h3>
       <ul className="mb-8 space-y-3 text-on-surface-variant">
@@ -187,6 +188,7 @@ function ProjectCard({
 
 export default function HomePage() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState(sections[0].id);
   const cardRefs = useRef<Set<HTMLElement>>(new Set());
 
   const registerCard = (el: HTMLElement | null) => {
@@ -230,7 +232,7 @@ export default function HomePage() {
     {
       company: "TradieCoach",
       role: "Software Developer & Team Lead",
-      period: "Jul 2025 – Nov 2025",
+      period: "Jul 2025 - Nov 2025",
       badge: "Industry Client Project",
       image: "/images/tradiecoach-cover.png",
       bullets: [
@@ -252,7 +254,7 @@ export default function HomePage() {
     {
       company: "Pupfish",
       role: "Software Developer",
-      period: "May 2025 – Present",
+      period: "May 2025 - Present",
       badge: "Ongoing Project",
       image: "/images/pupfish-cover.png",
       imageLayout: "portrait-side",
@@ -276,7 +278,7 @@ export default function HomePage() {
     {
       company: "Kompass",
       role: "Software Developer",
-      period: "Jun 2026 – Present",
+      period: "Jun 2026 - Present",
       badge: "Community Platform Project",
       bullets: [
         {
@@ -400,11 +402,38 @@ export default function HomePage() {
     return () => observer.disconnect();
   }, []);
 
+  useEffect(() => {
+    const navOffset = 96;
+
+    const updateActiveSection = () => {
+      let current = sections[0].id;
+
+      for (const section of sections) {
+        const el = document.getElementById(section.id);
+        if (!el) continue;
+        if (el.getBoundingClientRect().top - navOffset <= 0) {
+          current = section.id;
+        }
+      }
+
+      setActiveSection((prev) => (prev === current ? prev : current));
+    };
+
+    updateActiveSection();
+    window.addEventListener("scroll", updateActiveSection, { passive: true });
+    window.addEventListener("resize", updateActiveSection);
+    return () => {
+      window.removeEventListener("scroll", updateActiveSection);
+      window.removeEventListener("resize", updateActiveSection);
+    };
+  }, []);
+
   const handleScroll = (id: string) => {
     const el = document.getElementById(id);
     if (!el) return;
     const y = el.getBoundingClientRect().top + window.scrollY - 72;
     window.scrollTo({ top: y, behavior: "smooth" });
+    setActiveSection(id);
     setMenuOpen(false);
   };
 
@@ -414,18 +443,14 @@ export default function HomePage() {
 
       <nav className="fixed top-0 z-50 h-16 w-full border-b border-border-subtle bg-surface-glass shadow-sm backdrop-blur-md">
         <div className="mx-auto flex h-full max-w-[var(--spacing-container-max)] items-center justify-between px-margin-mobile md:px-gutter">
-          <button
+          <ContrastAware
+            as="button"
             type="button"
             onClick={() => handleScroll("about")}
-            className="flex items-center gap-2 transition hover:scale-105"
+            className="flex items-center gap-2 rounded-lg transition hover:scale-105"
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={LOGO_SRC}
-              alt="Inseong Developer Logo"
-              className="h-10 w-auto rounded-md"
-            />
-          </button>
+            <SiteLogo />
+          </ContrastAware>
 
           <div className="hidden items-center gap-stack-lg md:flex">
             {sections.map((section) => (
@@ -433,7 +458,12 @@ export default function HomePage() {
                 key={section.id}
                 type="button"
                 onClick={() => handleScroll(section.id)}
-                className="nav-link font-[family-name:var(--font-body)] text-body-md text-on-surface-variant transition-colors duration-300 hover:text-primary"
+                aria-current={activeSection === section.id ? "true" : undefined}
+                className={`nav-link font-[family-name:var(--font-body)] text-body-md transition-colors duration-300 hover:text-primary ${
+                  activeSection === section.id
+                    ? "is-active text-primary"
+                    : "text-on-surface-variant"
+                }`}
               >
                 {section.label}
               </button>
@@ -444,16 +474,20 @@ export default function HomePage() {
             >
               Blog
             </Link>
+            <ThemeToggle />
           </div>
 
-          <button
-            type="button"
-            className="text-primary md:hidden"
-            aria-label="Open navigation menu"
-            onClick={() => setMenuOpen((prev) => !prev)}
-          >
-            <span className="material-symbols-outlined text-[2rem]">menu</span>
-          </button>
+          <div className="flex items-center gap-2 md:hidden">
+            <ThemeToggle />
+            <button
+              type="button"
+              className="text-primary"
+              aria-label="Open navigation menu"
+              onClick={() => setMenuOpen((prev) => !prev)}
+            >
+              <span className="material-symbols-outlined text-[2rem]">menu</span>
+            </button>
+          </div>
         </div>
 
         {menuOpen && (
@@ -469,7 +503,12 @@ export default function HomePage() {
                   key={section.id}
                   type="button"
                   onClick={() => handleScroll(section.id)}
-                  className="block w-full rounded-lg px-3 py-2.5 text-left text-sm text-on-surface-variant transition hover:bg-surface-glass hover:text-primary"
+                  aria-current={activeSection === section.id ? "true" : undefined}
+                  className={`block w-full rounded-lg px-3 py-2.5 text-left text-sm transition hover:bg-surface-glass hover:text-primary ${
+                    activeSection === section.id
+                      ? "bg-surface-glass font-medium text-primary"
+                      : "text-on-surface-variant"
+                  }`}
                 >
                   {section.label}
                 </button>
@@ -495,9 +534,10 @@ export default function HomePage() {
             <p className="mb-stack-md font-mono text-label-mono uppercase tracking-widest text-primary">
               Portfolio
             </p>
-            <h1 className="mb-stack-lg font-[family-name:var(--font-display)] text-display-xl-mobile font-extrabold tracking-[-0.02em] text-primary md:text-display-xl md:tracking-[-0.04em]">
-              Hi, I&apos;m <span className="text-white">Inseong.</span>
-            </h1>
+            <ContrastAware as="h1" className="mb-stack-lg font-[family-name:var(--font-display)] text-display-xl-mobile font-extrabold tracking-[-0.02em] text-primary md:text-display-xl md:tracking-[-0.04em]">
+              Hi, I&apos;m{" "}
+              <span className="site-logo__name text-on-surface">Justin.</span>
+            </ContrastAware>
             <p className="mb-stack-lg max-w-2xl font-[family-name:var(--font-body)] text-body-lg leading-relaxed text-on-surface-variant">
               This website is my personal portfolio where I organise my work,
               experience, and ideas I want to explore. Scroll down to see my
@@ -542,7 +582,7 @@ export default function HomePage() {
                 <>
                   <div className="mb-4 flex flex-col justify-between gap-2 md:flex-row">
                     <div>
-                      <h3 className="font-[family-name:var(--font-display)] text-headline-md text-white">
+                      <h3 className="font-[family-name:var(--font-display)] text-headline-md text-on-surface">
                         {exp.link ? (
                           <ExternalLink href={exp.link}>{exp.company}</ExternalLink>
                         ) : (
@@ -695,7 +735,7 @@ export default function HomePage() {
                 className="flex flex-col justify-between gap-4 p-stack-lg md:flex-row md:items-center"
               >
                 <div>
-                  <h3 className="font-[family-name:var(--font-display)] text-headline-md text-white">
+                  <h3 className="font-[family-name:var(--font-display)] text-headline-md text-on-surface">
                     Monash University / Software Development
                   </h3>
                   <p className="font-[family-name:var(--font-body)] text-body-lg text-on-surface-variant">
@@ -709,7 +749,7 @@ export default function HomePage() {
                 className="flex flex-col justify-between gap-4 p-stack-lg md:flex-row md:items-center"
               >
                 <div>
-                  <h3 className="font-[family-name:var(--font-display)] text-headline-md text-white">
+                  <h3 className="font-[family-name:var(--font-display)] text-headline-md text-on-surface">
                     Tech University of Korea
                   </h3>
                   <p className="font-[family-name:var(--font-body)] text-body-lg text-on-surface-variant">
@@ -746,7 +786,7 @@ export default function HomePage() {
                   <span className={`material-symbols-outlined ${cat.iconColor}`}>
                     {cat.icon}
                   </span>
-                  <h3 className="font-[family-name:var(--font-display)] text-2xl text-white">
+                  <h3 className="font-[family-name:var(--font-display)] text-2xl text-on-surface">
                     {cat.title}
                   </h3>
                 </div>
@@ -781,46 +821,55 @@ export default function HomePage() {
               is always open.
             </p>
             <div className="mx-auto grid max-w-4xl grid-cols-1 gap-6 md:grid-cols-3">
-              <a
+              <ContrastAware
+                as="a"
                 href="mailto:is8159750@gmail.com"
                 className="flex flex-col items-center rounded-xl border border-primary/10 bg-primary/5 p-8 transition hover:border-primary/40 hover:bg-primary/10"
               >
-                <span className="material-symbols-outlined mb-4 text-4xl text-primary">
+                <span className="material-symbols-outlined contrast-aware__icon mb-4 text-4xl text-primary">
                   mail
                 </span>
-                <span className="mb-1 font-bold text-white">Email</span>
-                <span className="text-caption text-on-surface-variant">
+                <span className="contrast-aware__title mb-1 font-bold text-on-surface">
+                  Email
+                </span>
+                <span className="contrast-aware__muted text-caption text-on-surface-variant">
                   is8159750@gmail.com
                 </span>
-              </a>
-              <a
+              </ContrastAware>
+              <ContrastAware
+                as="a"
                 href="https://github.com/Inseong-Hwang-dev"
                 target="_blank"
                 rel="noreferrer"
                 className="flex flex-col items-center rounded-xl border border-primary/10 bg-primary/5 p-8 transition hover:border-primary/40 hover:bg-primary/10"
               >
-                <span className="material-symbols-outlined mb-4 text-4xl text-primary">
+                <span className="material-symbols-outlined contrast-aware__icon mb-4 text-4xl text-primary">
                   terminal
                 </span>
-                <span className="mb-1 font-bold text-white">GitHub</span>
-                <span className="text-caption text-on-surface-variant">
+                <span className="contrast-aware__title mb-1 font-bold text-on-surface">
+                  GitHub
+                </span>
+                <span className="contrast-aware__muted text-caption text-on-surface-variant">
                   @Inseong-Hwang-dev
                 </span>
-              </a>
-              <a
+              </ContrastAware>
+              <ContrastAware
+                as="a"
                 href="https://linkedin.com/in/inseong-hwang-b888872b7/"
                 target="_blank"
                 rel="noreferrer"
                 className="flex flex-col items-center rounded-xl border border-primary/10 bg-primary/5 p-8 transition hover:border-primary/40 hover:bg-primary/10"
               >
-                <span className="material-symbols-outlined mb-4 text-4xl text-primary">
+                <span className="material-symbols-outlined contrast-aware__icon mb-4 text-4xl text-primary">
                   person
                 </span>
-                <span className="mb-1 font-bold text-white">LinkedIn</span>
-                <span className="text-caption text-on-surface-variant">
-                  Inseong Hwang
+                <span className="contrast-aware__title mb-1 font-bold text-on-surface">
+                  LinkedIn
                 </span>
-              </a>
+                <span className="contrast-aware__muted text-caption text-on-surface-variant">
+                  Justin
+                </span>
+              </ContrastAware>
             </div>
           </GlassCard>
         </div>
@@ -828,14 +877,14 @@ export default function HomePage() {
 
       <footer className="w-full border-t border-border-subtle bg-background-obsidian py-stack-lg">
         <div className="mx-auto flex max-w-[var(--spacing-container-max)] flex-col items-center justify-between gap-stack-md px-margin-mobile md:flex-row md:px-gutter">
-          <div className="flex flex-col items-center md:items-start">
-            <span className="mb-2 font-[family-name:var(--font-display)] text-headline-md text-primary">
-              Inseong.
+          <ContrastAware className="flex flex-col items-center rounded-lg md:items-start">
+            <span className="site-logo__name mb-2 font-[family-name:var(--font-display)] text-headline-md text-primary">
+              Justin.
             </span>
             <p className="font-[family-name:var(--font-body)] text-caption text-on-surface-variant opacity-80">
               © {new Date().getFullYear()} DevPortfolio. Built with precision.
             </p>
-          </div>
+          </ContrastAware>
           <div className="flex gap-8">
             <a
               href="https://github.com/Inseong-Hwang-dev"
