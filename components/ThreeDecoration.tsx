@@ -1,9 +1,13 @@
 "use client";
 
+import ContrastAware from "@/components/ContrastAware";
 import { useEffect, useRef } from "react";
 
+const COLOR_DEFAULT = 0x00e5ff;
+const COLOR_ON_DARK = 0xb8f7ff;
+
 export default function ThreeDecoration() {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -33,17 +37,33 @@ export default function ThreeDecoration() {
       pointLight.position.set(5, 5, 5);
       scene.add(pointLight);
 
+      const material = new THREE.MeshPhongMaterial({
+        color: COLOR_DEFAULT,
+        wireframe: true,
+        transparent: true,
+        opacity: 0.8
+      });
+
       const mesh = new THREE.Mesh(
         new THREE.IcosahedronGeometry(2, 1),
-        new THREE.MeshPhongMaterial({
-          color: 0x00e5ff,
-          wireframe: true,
-          transparent: true,
-          opacity: 0.8
-        })
+        material
       );
       scene.add(mesh);
       camera.position.z = 5;
+
+      const syncContrast = () => {
+        const onDark = container.dataset.onDark === "true";
+        material.color.setHex(onDark ? COLOR_ON_DARK : COLOR_DEFAULT);
+        material.opacity = onDark ? 0.95 : 0.8;
+        pointLight.intensity = onDark ? 1.35 : 1;
+      };
+
+      syncContrast();
+      const contrastObserver = new MutationObserver(syncContrast);
+      contrastObserver.observe(container, {
+        attributes: true,
+        attributeFilter: ["data-on-dark", "class"]
+      });
 
       let mouseX = 0;
       let mouseY = 0;
@@ -76,16 +96,13 @@ export default function ThreeDecoration() {
       animate();
 
       return () => {
+        contrastObserver.disconnect();
         window.removeEventListener("mousemove", onMouseMove);
         window.removeEventListener("resize", onResize);
         cancelAnimationFrame(frameId);
         renderer.dispose();
         mesh.geometry.dispose();
-        if (Array.isArray(mesh.material)) {
-          mesh.material.forEach((m) => m.dispose());
-        } else {
-          mesh.material.dispose();
-        }
+        material.dispose();
         if (renderer.domElement.parentNode === container) {
           container.removeChild(renderer.domElement);
         }
@@ -105,8 +122,10 @@ export default function ThreeDecoration() {
   }, []);
 
   return (
-    <div
-      ref={containerRef}
+    <ContrastAware
+      elementRef={(el) => {
+        containerRef.current = el;
+      }}
       className="glass-card relative min-h-[18.75rem] overflow-hidden rounded-xl"
       aria-hidden
     />

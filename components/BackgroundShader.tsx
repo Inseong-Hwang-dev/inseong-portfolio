@@ -1,5 +1,7 @@
 "use client";
 
+import { publishBgFrame } from "@/lib/bgLuminance";
+import { useTheme } from "next-themes";
 import { useEffect, useRef } from "react";
 
 const VERTEX_SHADER = `
@@ -15,6 +17,7 @@ const FRAGMENT_SHADER = `
   precision highp float;
   uniform float u_time;
   uniform vec2 u_resolution;
+  uniform float u_isDark;
   varying vec2 v_texCoord;
 
   void main() {
@@ -22,11 +25,22 @@ const FRAGMENT_SHADER = `
     float time = u_time * 0.2;
     float noise = sin(uv.x * 3.0 + time) * cos(uv.y * 2.0 - time * 0.8);
     noise += sin(uv.y * 4.0 + time * 1.2) * cos(uv.x * 5.0 + time);
-    vec3 color1 = vec3(0.02, 0.08, 0.14);
-    vec3 color2 = vec3(0.0, 0.1, 0.15);
-    vec3 accent = vec3(0.0, 0.898, 1.0);
+
+    vec3 darkColor1 = vec3(0.02, 0.08, 0.14);
+    vec3 darkColor2 = vec3(0.0, 0.1, 0.15);
+    vec3 darkAccent = vec3(0.0, 0.898, 1.0);
+
+    vec3 lightColor1 = vec3(0.91, 0.94, 0.97);
+    vec3 lightColor2 = vec3(0.88, 0.92, 0.96);
+    vec3 lightAccent = vec3(0.35, 0.62, 0.68);
+
+    vec3 color1 = mix(lightColor1, darkColor1, u_isDark);
+    vec3 color2 = mix(lightColor2, darkColor2, u_isDark);
+    vec3 accent = mix(lightAccent, darkAccent, u_isDark);
+    float accentStrength = mix(0.22, 0.1, u_isDark);
+
     vec3 baseColor = mix(color1, color2, noise * 0.5 + 0.5);
-    vec3 finalColor = mix(baseColor, accent * 0.1, pow(max(0.0, noise), 3.0));
+    vec3 finalColor = mix(baseColor, accent * accentStrength, pow(max(0.0, noise), 3.0));
     gl_FragColor = vec4(finalColor, 1.0);
   }
 `;
@@ -49,6 +63,12 @@ function createShader(
 
 export default function BackgroundShader() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const isDarkRef = useRef(1);
+  const { resolvedTheme } = useTheme();
+
+  useEffect(() => {
+    isDarkRef.current = resolvedTheme === "light" ? 0 : 1;
+  }, [resolvedTheme]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -80,10 +100,14 @@ export default function BackgroundShader() {
     const positionLocation = gl.getAttribLocation(program, "position");
     const timeLocation = gl.getUniformLocation(program, "u_time");
     const resLocation = gl.getUniformLocation(program, "u_resolution");
+    const isDarkLocation = gl.getUniformLocation(program, "u_isDark");
 
     let frameId = 0;
 
     const render = (time: number) => {
+      const timeSec = time * 0.001;
+      const isDark = isDarkRef.current === 1;
+
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
       gl.viewport(0, 0, canvas.width, canvas.height);
@@ -91,9 +115,12 @@ export default function BackgroundShader() {
       gl.enableVertexAttribArray(positionLocation);
       gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
       gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
-      gl.uniform1f(timeLocation, time * 0.001);
+      gl.uniform1f(timeLocation, timeSec);
       gl.uniform2f(resLocation, canvas.width, canvas.height);
+      gl.uniform1f(isDarkLocation, isDarkRef.current);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+
+      publishBgFrame(timeSec, isDark);
       frameId = requestAnimationFrame(render);
     };
 
