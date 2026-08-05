@@ -4,6 +4,7 @@ import BackgroundShader from "@/components/BackgroundShader";
 import ContrastAware from "@/components/ContrastAware";
 import SiteLogo from "@/components/SiteLogo";
 import ThreeDecoration from "@/components/ThreeDecoration";
+import BgShadowToggle from "@/components/theme/BgShadowToggle";
 import ThemeToggle from "@/components/theme/ThemeToggle";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
@@ -442,7 +443,7 @@ export default function HomePage() {
       <BackgroundShader />
 
       <nav className="fixed top-0 z-50 h-16 w-full border-b border-border-subtle bg-surface-glass shadow-sm backdrop-blur-md">
-        <div className="mx-auto flex h-full max-w-[var(--spacing-container-max)] items-center justify-between px-margin-mobile md:px-gutter">
+        <div className="mx-auto grid h-full max-w-[var(--spacing-container-max)] grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 px-margin-mobile md:grid-cols-[auto_minmax(0,1fr)_auto_auto_auto] md:gap-4 md:px-gutter">
           <ContrastAware
             as="button"
             type="button"
@@ -452,14 +453,14 @@ export default function HomePage() {
             <SiteLogo />
           </ContrastAware>
 
-          <div className="hidden items-center gap-stack-lg md:flex">
+          <div className="hidden min-w-0 items-center justify-end gap-stack-lg md:flex">
             {sections.map((section) => (
               <button
                 key={section.id}
                 type="button"
                 onClick={() => handleScroll(section.id)}
                 aria-current={activeSection === section.id ? "true" : undefined}
-                className={`nav-link font-[family-name:var(--font-body)] text-body-md transition-colors duration-300 hover:text-primary ${
+                className={`nav-link shrink-0 font-[family-name:var(--font-body)] text-body-md transition-colors duration-300 hover:text-primary ${
                   activeSection === section.id
                     ? "is-active text-primary"
                     : "text-on-surface-variant"
@@ -468,16 +469,19 @@ export default function HomePage() {
                 {section.label}
               </button>
             ))}
-            <Link
-              href="/blog"
-              className="rounded-full bg-primary px-6 py-2 font-bold text-on-primary shadow-lg shadow-primary/20 transition hover:scale-105"
-            >
-              Blog
-            </Link>
-            <ThemeToggle />
           </div>
 
-          <div className="flex items-center gap-2 md:hidden">
+          <Link
+            href="/blog"
+            className="hidden rounded-full bg-primary px-6 py-2 font-bold text-on-primary shadow-lg shadow-primary/20 transition hover:scale-105 md:inline-flex"
+          >
+            Blog
+          </Link>
+          <BgShadowToggle className="hidden md:inline-flex" />
+          <ThemeToggle className="hidden md:inline-flex" />
+
+          <div className="col-start-3 flex items-center justify-end gap-2 md:hidden">
+            <BgShadowToggle />
             <ThemeToggle />
             <button
               type="button"

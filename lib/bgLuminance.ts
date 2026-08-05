@@ -1,3 +1,5 @@
+import { getBgShadowEnabled } from "@/lib/bgShadowPreference";
+
 type BgListener = (timeSec: number, isDark: boolean) => void;
 
 let currentTimeSec = 0;
@@ -25,6 +27,11 @@ export function sampleBgLuma(
   timeSec: number,
   isDark: boolean
 ): number {
+  // Flat field when WebGL shadows are toggled off
+  if (!getBgShadowEnabled()) {
+    return isDark ? 0.08 : 0.93;
+  }
+
   const width = typeof window !== "undefined" ? window.innerWidth || 1 : 1;
   const height = typeof window !== "undefined" ? window.innerHeight || 1 : 1;
   const uvx = clientX / width;

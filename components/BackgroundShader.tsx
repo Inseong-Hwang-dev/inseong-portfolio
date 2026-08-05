@@ -1,6 +1,11 @@
 "use client";
 
 import { publishBgFrame } from "@/lib/bgLuminance";
+import {
+  getBgShadowEnabled,
+  hydrateBgShadowPreference,
+  subscribeBgShadow
+} from "@/lib/bgShadowPreference";
 import { useTheme } from "next-themes";
 import { useEffect, useRef } from "react";
 
@@ -64,11 +69,27 @@ function createShader(
 export default function BackgroundShader() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const isDarkRef = useRef(1);
+  const shadowEnabledRef = useRef(true);
   const { resolvedTheme } = useTheme();
 
   useEffect(() => {
     isDarkRef.current = resolvedTheme === "light" ? 0 : 1;
   }, [resolvedTheme]);
+
+  useEffect(() => {
+    hydrateBgShadowPreference();
+    shadowEnabledRef.current = getBgShadowEnabled();
+    const canvas = canvasRef.current;
+    if (canvas) {
+      canvas.style.visibility = shadowEnabledRef.current ? "visible" : "hidden";
+    }
+    return subscribeBgShadow((enabled) => {
+      shadowEnabledRef.current = enabled;
+      if (canvasRef.current) {
+        canvasRef.current.style.visibility = enabled ? "visible" : "hidden";
+      }
+    });
+  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -107,18 +128,21 @@ export default function BackgroundShader() {
     const render = (time: number) => {
       const timeSec = time * 0.001;
       const isDark = isDarkRef.current === 1;
+      const shadowOn = shadowEnabledRef.current;
 
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      gl.viewport(0, 0, canvas.width, canvas.height);
-      gl.useProgram(program);
-      gl.enableVertexAttribArray(positionLocation);
-      gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-      gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
-      gl.uniform1f(timeLocation, timeSec);
-      gl.uniform2f(resLocation, canvas.width, canvas.height);
-      gl.uniform1f(isDarkLocation, isDarkRef.current);
-      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+      if (shadowOn) {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        gl.viewport(0, 0, canvas.width, canvas.height);
+        gl.useProgram(program);
+        gl.enableVertexAttribArray(positionLocation);
+        gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+        gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
+        gl.uniform1f(timeLocation, timeSec);
+        gl.uniform2f(resLocation, canvas.width, canvas.height);
+        gl.uniform1f(isDarkLocation, isDarkRef.current);
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+      }
 
       publishBgFrame(timeSec, isDark);
       frameId = requestAnimationFrame(render);
