@@ -37,7 +37,7 @@ export default function BlogPage() {
   return (
     <BlogShell>
       <main className="relative mx-auto min-h-screen max-w-[var(--spacing-container-max)] px-margin-mobile pb-section-gap pt-32 md:px-gutter">
-        <header className="mb-stack-lg max-w-3xl">
+        <ContrastAware className="contrast-aware--text mb-stack-lg max-w-3xl">
           <nav
             aria-label="Breadcrumb"
             className="mb-stack-md flex items-center gap-2 font-mono text-label-mono text-accent-neon-cyan/60"
@@ -57,10 +57,10 @@ export default function BlogPage() {
             Three tracks: a day-to-day engineering diary, AI study applied to
             real work, and longer retrospectives after shipping.
           </p>
-        </header>
+        </ContrastAware>
 
         <section aria-labelledby="categories-heading" className="mb-stack-lg">
-          <div className="mb-stack-md flex items-center justify-between">
+          <ContrastAware className="contrast-aware--text mb-stack-md flex items-center justify-between">
             <h2
               id="categories-heading"
               className="font-[family-name:var(--font-display)] text-headline-md text-on-surface"
@@ -68,7 +68,7 @@ export default function BlogPage() {
               Categories
             </h2>
             <div className="mx-stack-lg h-px flex-1 bg-border-subtle" />
-          </div>
+          </ContrastAware>
           <div className="grid grid-cols-1 gap-stack-md md:grid-cols-3">
             {BLOG_CATEGORIES.map((slug) => {
               const meta = CATEGORY_META[slug];
@@ -105,7 +105,7 @@ export default function BlogPage() {
           aria-labelledby="recent-heading"
           className="space-y-stack-md"
         >
-          <div className="mb-stack-md flex items-center justify-between">
+          <ContrastAware className="contrast-aware--text mb-stack-md flex items-center justify-between">
             <h2
               id="recent-heading"
               className="font-[family-name:var(--font-display)] text-headline-md text-on-surface"
@@ -113,7 +113,7 @@ export default function BlogPage() {
               Recent Posts
             </h2>
             <div className="mx-stack-lg h-px flex-1 bg-border-subtle" />
-          </div>
+          </ContrastAware>
 
           {recent.length > 0 ? (
             <ul className="space-y-stack-md">

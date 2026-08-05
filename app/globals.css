@@ -432,6 +432,85 @@ section {
   background-color: rgba(8, 18, 28, 0.22) !important;
 }
 
+/* Headings / copy outside glass cards: flip text only */
+.contrast-aware--text.contrast-aware--on-dark {
+  border-color: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Heading element itself (ContrastAwareScope stamps class on h1–h4) */
+h1.contrast-aware--on-dark,
+h2.contrast-aware--on-dark,
+h3.contrast-aware--on-dark,
+h4.contrast-aware--on-dark,
+h5.contrast-aware--on-dark,
+h6.contrast-aware--on-dark,
+.prose-blog h1.contrast-aware--on-dark,
+.prose-blog h2.contrast-aware--on-dark,
+.prose-blog h3.contrast-aware--on-dark,
+.prose-blog h4.contrast-aware--on-dark,
+.prose-blog h5.contrast-aware--on-dark,
+.prose-blog h6.contrast-aware--on-dark {
+  color: #f7fbff !important;
+}
+
+/* MDX / prose body blocks */
+p.contrast-aware--on-dark,
+li.contrast-aware--on-dark,
+blockquote.contrast-aware--on-dark,
+td.contrast-aware--on-dark,
+th.contrast-aware--on-dark,
+.prose-blog p.contrast-aware--on-dark,
+.prose-blog li.contrast-aware--on-dark,
+.prose-blog blockquote.contrast-aware--on-dark,
+.prose-blog td.contrast-aware--on-dark,
+.prose-blog th.contrast-aware--on-dark {
+  color: rgba(247, 251, 255, 0.88) !important;
+}
+
+.prose-blog .contrast-aware--on-dark strong {
+  color: #f7fbff !important;
+}
+
+.prose-blog .contrast-aware--on-dark a {
+  color: #9aeffa !important;
+}
+
+.prose-blog .contrast-aware--on-dark a:hover {
+  color: #d6fbff !important;
+}
+
+.prose-blog .contrast-aware--on-dark code {
+  color: #9aeffa !important;
+  border-color: rgba(154, 239, 250, 0.3);
+  background: rgba(154, 239, 250, 0.12);
+}
+
+.prose-blog pre.contrast-aware--on-dark {
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+.prose-blog pre.contrast-aware--on-dark code {
+  color: #f7fbff !important;
+  border: none;
+  background: transparent;
+}
+
+.prose-blog blockquote.contrast-aware--on-dark {
+  border-left-color: rgba(154, 239, 250, 0.55);
+}
+
+/* When text colour utilities sit on the ContrastAware root itself */
+.contrast-aware--on-dark.text-on-surface,
+.contrast-aware--on-dark.text-on-surface-variant {
+  color: #f7fbff !important;
+}
+
+.contrast-aware--on-dark .bg-border-subtle {
+  background-color: rgba(247, 251, 255, 0.28) !important;
+}
+
 .contrast-aware--on-dark .contrast-aware__title,
 .contrast-aware--on-dark .text-on-surface,
 .contrast-aware--on-dark h1,

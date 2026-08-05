@@ -1,5 +1,6 @@
 import BlogShell from "@/components/blog/BlogShell";
 import MdxContent from "@/components/blog/MdxContent";
+import ContrastAwareScope from "@/components/ContrastAwareScope";
 import {
   AUTHOR_NAME,
   CATEGORY_META,
@@ -124,97 +125,102 @@ export default async function PostPage({ params }: Props) {
         }}
       />
       <main className="relative mx-auto min-h-screen max-w-[var(--spacing-container-max)] px-margin-mobile pb-section-gap pt-32 md:px-gutter">
-        <article className="mx-auto max-w-3xl">
-          <nav
-            aria-label="Breadcrumb"
-            className="mb-stack-md flex flex-wrap items-center gap-2 font-mono text-label-mono text-accent-neon-cyan/60"
-          >
-            <Link href="/" className="transition hover:text-accent-neon-cyan">
-              HOME
-            </Link>
-            <span className="material-symbols-outlined text-[14px]" aria-hidden>
-              chevron_right
-            </span>
-            <Link
-              href="/blog"
-              className="transition hover:text-accent-neon-cyan"
+        <ContrastAwareScope className="mx-auto max-w-3xl">
+          <article>
+            <nav
+              aria-label="Breadcrumb"
+              className="mb-stack-md flex flex-wrap items-center gap-2 font-mono text-label-mono text-accent-neon-cyan/60"
             >
-              BLOG
-            </Link>
-            <span className="material-symbols-outlined text-[14px]" aria-hidden>
-              chevron_right
-            </span>
-            <Link
-              href={`/blog/${category}`}
-              className="transition hover:text-accent-neon-cyan"
-            >
-              {categoryMeta.label.toUpperCase()}
-            </Link>
-            <span className="material-symbols-outlined text-[14px]" aria-hidden>
-              chevron_right
-            </span>
-            <span className="truncate text-accent-neon-cyan">POST</span>
-          </nav>
-
-          <header className="mb-stack-lg border-b border-border-subtle pb-stack-lg">
-            <p className="mb-stack-md font-mono text-[11px] uppercase tracking-wider text-accent-neon-cyan">
+              <Link href="/" className="transition hover:text-accent-neon-cyan">
+                HOME
+              </Link>
+              <span className="material-symbols-outlined text-[14px]" aria-hidden>
+                chevron_right
+              </span>
+              <Link
+                href="/blog"
+                className="transition hover:text-accent-neon-cyan"
+              >
+                BLOG
+              </Link>
+              <span className="material-symbols-outlined text-[14px]" aria-hidden>
+                chevron_right
+              </span>
               <Link
                 href={`/blog/${category}`}
-                className="transition hover:text-primary"
+                className="transition hover:text-accent-neon-cyan"
               >
-                {categoryMeta.label}
+                {categoryMeta.label.toUpperCase()}
               </Link>
-            </p>
-            <h1 className="mb-stack-md font-[family-name:var(--font-display)] text-display-xl-mobile font-extrabold tracking-[-0.02em] text-on-surface md:text-headline-lg md:tracking-tight">
-              {post.title}
-            </h1>
-            <p className="mb-stack-md text-body-lg leading-relaxed text-on-surface-variant">
-              {post.description}
-            </p>
-            <div className="flex flex-wrap items-center gap-3 font-mono text-[11px] uppercase tracking-wider text-on-surface-variant/70">
-              <time dateTime={post.date}>{formatPostDate(post.date)}</time>
-              <span aria-hidden>·</span>
-              <span>{post.readingTimeMinutes} min read</span>
-              {post.updated ? (
-                <>
-                  <span aria-hidden>·</span>
-                  <span>
-                    Updated{" "}
-                    <time dateTime={post.updated}>
-                      {formatPostDate(post.updated)}
-                    </time>
-                  </span>
-                </>
-              ) : null}
-            </div>
-            {post.tags && post.tags.length > 0 ? (
-              <div className="mt-stack-md flex flex-wrap gap-2">
-                {post.tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="rounded border border-border-subtle bg-accent-neon-cyan/5 px-2 py-1 font-mono text-[11px] text-accent-neon-cyan"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            ) : null}
-          </header>
-
-          <MdxContent source={post.content} />
-
-          <footer className="mt-stack-lg border-t border-border-subtle pt-stack-lg">
-            <Link
-              href={`/blog/${category}`}
-              className="inline-flex items-center gap-2 font-mono text-caption uppercase tracking-wider text-accent-neon-cyan transition hover:text-primary"
-            >
-              <span className="material-symbols-outlined text-[16px]" aria-hidden>
-                arrow_back
+              <span className="material-symbols-outlined text-[14px]" aria-hidden>
+                chevron_right
               </span>
-              Back to {categoryMeta.label}
-            </Link>
-          </footer>
-        </article>
+              <span className="truncate text-accent-neon-cyan">POST</span>
+            </nav>
+
+            <header className="mb-stack-lg border-b border-border-subtle pb-stack-lg">
+              <p className="mb-stack-md font-mono text-[11px] uppercase tracking-wider text-accent-neon-cyan">
+                <Link
+                  href={`/blog/${category}`}
+                  className="transition hover:text-primary"
+                >
+                  {categoryMeta.label}
+                </Link>
+              </p>
+              <h1 className="mb-stack-md font-[family-name:var(--font-display)] text-display-xl-mobile font-extrabold tracking-[-0.02em] text-on-surface md:text-headline-lg md:tracking-tight">
+                {post.title}
+              </h1>
+              <p className="mb-stack-md text-body-lg leading-relaxed text-on-surface-variant">
+                {post.description}
+              </p>
+              <div className="flex flex-wrap items-center gap-3 font-mono text-[11px] uppercase tracking-wider text-on-surface-variant/70">
+                <time dateTime={post.date}>{formatPostDate(post.date)}</time>
+                <span aria-hidden>·</span>
+                <span>{post.readingTimeMinutes} min read</span>
+                {post.updated ? (
+                  <>
+                    <span aria-hidden>·</span>
+                    <span>
+                      Updated{" "}
+                      <time dateTime={post.updated}>
+                        {formatPostDate(post.updated)}
+                      </time>
+                    </span>
+                  </>
+                ) : null}
+              </div>
+              {post.tags && post.tags.length > 0 ? (
+                <div className="mt-stack-md flex flex-wrap gap-2">
+                  {post.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="rounded border border-border-subtle bg-accent-neon-cyan/5 px-2 py-1 font-mono text-[11px] text-accent-neon-cyan"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              ) : null}
+            </header>
+
+            <MdxContent source={post.content} />
+
+            <footer className="mt-stack-lg border-t border-border-subtle pt-stack-lg">
+              <Link
+                href={`/blog/${category}`}
+                className="inline-flex items-center gap-2 font-mono text-caption uppercase tracking-wider text-accent-neon-cyan transition hover:text-primary"
+              >
+                <span
+                  className="material-symbols-outlined text-[16px]"
+                  aria-hidden
+                >
+                  arrow_back
+                </span>
+                Back to {categoryMeta.label}
+              </Link>
+            </footer>
+          </article>
+        </ContrastAwareScope>
       </main>
     </BlogShell>
   );
