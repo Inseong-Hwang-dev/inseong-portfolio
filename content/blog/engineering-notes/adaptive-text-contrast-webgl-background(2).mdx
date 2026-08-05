@@ -1,0 +1,73 @@
+---
+title: "Keeping Glass-Card Text Readable on a Moving WebGL Background"
+description: "How I kept portfolio text readable as dark WebGL noise moved behind translucent cards — without sampling pixels from the canvas."
+date: "2026-08-04"
+tags:
+  - Work Log
+  - WebGL
+  - React
+  - CSS
+  - Accessibility
+draft: true
+---
+
+While polishing the portfolio's light mode, I added a full-screen WebGL noise background behind semi-transparent glass cards. It looked great at first, but it created a small accessibility problem: when a darker patch of noise moved behind a card, dark text such as `Email`, `GitHub`, and headings could become difficult to read.
+
+I did not want to change the entire theme or make the cards fully opaque. Instead, I wanted each card to switch to a light foreground colour only when its own backdrop became dark.
+
+## The approach
+
+| Approach | Why not (or why) |
+| --- | --- |
+| `mix-blend-mode: difference` | It is simple, but it also changes the cyan accent colours in ways that do not feel intentional on a blurred glass surface. |
+| `readPixels` / screenshot sampling | It would give the real canvas pixels, but reading back from WebGL is not a great fit for a small visual effect that runs continuously. |
+| **Mirror the shader calculation in JavaScript** | The background is procedural, so I can calculate the same colour from the same time and position without touching the framebuffer. |
+
+The last option was the best balance for this case. Rather than asking the GPU what it had already drawn, the UI re-runs the relevant part of the fragment shader in JavaScript. Given the same time value and UV coordinates, it can estimate the background colour underneath each card.
+
+## How it works
+
+```
+BackgroundShader (rAF)
+  → publishBgFrame(time, isDarkTheme)
+  → sampleBgLuma(x, y, time)   // JavaScript mirror of the GLSL calculation
+  → ContrastAware toggles .contrast-aware--on-dark
+  → CSS switches text / icon colours
+```
+
+1. The WebGL render loop publishes its current `u_time` value once per frame, so every card samples the same animation state.
+2. Each card converts a few screen positions into WebGL UV coordinates. The Y axis needs flipping because browser coordinates start from the top, while WebGL UV coordinates start from the bottom: `uv.y = 1 - clientY / height`.
+3. The JavaScript version of the shader returns an RGB value. I convert that to perceived brightness using Rec. 709 luma: `0.2126R + 0.7152G + 0.0722B`.
+4. If the average luma from those sample points is below roughly `0.52`, the card treats its backdrop as dark and adds a contrast class.
+5. CSS handles the visual change: text and icons become lighter, while the rest of the design stays the same.
+
+Sampling a few points rather than just the centre makes the result feel more stable when a noisy edge passes through a card.
+
+## A React detail I ran into
+
+The card entrance animation already uses `IntersectionObserver` and swaps `glass-card--hidden` for `glass-card--visible` with `classList`.
+
+My first thought was to store the contrast result in React state and use it in `className`. In this setup, that meant a later React render could write the original class list back onto the element, including `glass-card--hidden`. The card would disappear just as its text was meant to become brighter.
+
+The fix was to leave React's `className` stable and update only the extra contrast class imperatively:
+
+```ts
+element.classList.toggle("contrast-aware--on-dark", isBackgroundDark)
+```
+
+It is a small detail, but it is a good reminder that two different systems should not both own the same class attribute unless their updates are coordinated.
+
+## What I am trading off
+
+- The GLSL and JavaScript calculations need to stay in sync when the shader changes.
+- This samples the procedural background, not the final composited pixel. The glass blur and fill are ignored, so it is an estimate rather than a perfect measurement.
+- I skip off-screen cards to keep the work small.
+
+For a few cards on a portfolio page, this trade-off feels right. The effect stays smooth, the design keeps its glass look, and the important text remains readable while the background moves.
+
+## Files
+
+- `components/BackgroundShader.tsx` — render + `publishBgFrame`
+- `lib/bgLuminance.ts` — pub/sub + `sampleBgLuma`
+- `components/ContrastAware.tsx` — subscribe + classList toggle
+- `app/globals.css` — `.contrast-aware--on-dark` colour rules
